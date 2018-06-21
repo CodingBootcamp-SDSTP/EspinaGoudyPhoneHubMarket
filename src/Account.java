@@ -1,6 +1,5 @@
 public class Account
 {
-	private int userID;
 	private String username;
 	private String password;
 	private String email;
@@ -9,8 +8,7 @@ public class Account
 	private String date_registered;
 	private int usertype;
 
-	public Account(int userID, String username, String password, String email, String contact, String location, String date_registered, int usertype) {
-		this.userID = userID;
+	public Account(String username, String password, String email, String contact, String location, String date_registered, int usertype) {
 		this.username = username;
 		this.password = password;
 		this.email = email;
@@ -18,14 +16,6 @@ public class Account
 		this.location = location;
 		this.date_registered = date_registered;
 		this.usertype = usertype;
-	}
-
-	public void setUserId(int userID) {
-		this.userID = userID;
-	}
-
-	public int getUserId() {
-		return(userID);
 	}
 
 	public void setUsername(String username) {
