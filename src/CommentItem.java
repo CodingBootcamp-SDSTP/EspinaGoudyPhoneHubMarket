@@ -1,25 +1,25 @@
-public class Message 
+public class CommentItem
 {
-	private int messageID;
+	private int commentID;
 	private int postID;
 	private int userID;
 	private String messageBody;
-	private String dateMessage;
+	private String dateComment;
 
-	public Message(int messageID, int postID, int userID, String messageBody, String dateMessage) {
-		this.messageID = messageID;
+	public CommentItem(int commentID, int postID, int userID, String messageBody, String dateComment) {
+		this.commentID = commentID;
 		this.postID = postID;
 		this.userID = userID;
 		this.messageBody = messageBody;
-		this.dateMessage = dateMessage;
+		this.dateComment = dateComment;
 	}
 
-	public int getMessageID() {
-		return(messageID);
+	public int getCommentID() {
+		return(commentID);
 	}
 
-	public void setMessageID(int messageID) {
-		this.messageID = messageID;
+	public void setCommentID(int commentID) {
+		this.commentID = commentID;
 	}
 
 	public int getPostID() {
@@ -46,11 +46,11 @@ public class Message
 		this.messageBody = messageBody;
 	}
 
-	public String getDateMessage() {
-		return(dateMessage);
+	public String getDateComment() {
+		return(dateComment);
 	}
 
-	public void setDateMessage(String dateMessage) {
-		this.dateMessage = dateMessage;
+	public void setDateComment(String dateComment) {
+		this.dateComment = dateComment;
 	}
 }

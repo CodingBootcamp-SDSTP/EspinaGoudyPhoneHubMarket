@@ -1,63 +1,118 @@
+import java.util.ArrayList;
 import java.sql.*;
 
 public class PhoneHubDatabase
 {
-	private AccountCollection accounts;
-	private ItemCollection itemcollections;
+	private PhoneCollection phonecollection;
+	private UsersCollection userscollection;
+	private PostItemCollection postitemcollection;
+	private CommentItemCollection commentcollection;
+	private MessageCollection messagecollection;
+	private FeedbackCollection feedbackcollection;
 	private Connection conn;
-	private Statement stmt;
-	private ResultSet rs;
-	private StringBuilder sb = new StringBuilder();
+	private static PhoneHubDatabase _instance = null;
 
-	public PhoneHubDatabase() {
-		accounts = new AccountCollection();
-		itemcollections = new ItemCollection();
-		conn = DBConnection.getConnection();
+	public static PhoneHubDatabase instance() {
+		if(_instance == null) {
+			_instance = new PhoneHubDatabase();
+		}
+		return(_instance);
 	}
 
-	public String getAllUsersInfo() {
+	private PhoneHubDatabase() {
+		phonecollection = new PhoneCollection();
+		userscollection = new UsersCollection();
+		postitemcollection = new PostItemCollection();
+		commentcollection = new CommentItemCollection();
+		messagecollection = new MessageCollection();
+		feedbackcollection = new FeedbackCollection();
 		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM users");
-			while(rs.next()) {
-				sb.append("<username>" + rs.getString("username") + "</username>");
-				sb.append("<email>" + rs.getString("email") + "</email>");
-				sb.append("<contact>" + rs.getString("contact") + "</contact>");
-				sb.append("<location>" + rs.getString("location") + "</location>");
-				sb.append("<date_registered>" + rs.getString("date_registered") + "</date_registered>");
-			}
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/phonehubmarket?user=testuser&password=helloworld&serverTimezone=UTC&useSSL=false");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
-		finally {
-			try { if(stmt != null) {stmt = null;}} catch(Exception e){};
-			try { if(rs != null) {rs = null;}} catch(Exception e){};
-		}
-		return(sb.toString());
 	}
 
-	public String getAllPostedItems() {
+	public PhoneCollection getPhoneCollection() {
+		return(phonecollection);
+	}
+
+	public UsersCollection getUserCollection() {
+		return(userscollection);
+	}
+
+	public PostItemCollection getPostItemCollection() {
+		return(postitemcollection);
+	}
+
+	public CommentItemCollection getCommentItemCollection() {
+		return(commentcollection);
+	}
+
+	public MessageCollection getMessageCollection() {
+		return(messagecollection);
+	}
+
+	public FeedbackCollection getFeedbackCollection() {
+		return(feedbackcollection);
+	}
+
+	public void addUser(Users user) {
+		if(insertNewUser(user)) {
+			userscollection.addUsers(user);
+		}
+	}
+
+	public boolean insertNewUser(Users user) {
+		PreparedStatement stmt = null;
 		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM posted_items");
+			stmt = conn.prepareStatement("INSERT INTO users ( username, password, email, contact, location, date_registered) VALUES ( ?, ?, ?, ?, ?, ? )");
+			stmt.setString(1, user.getUsername());
+			stmt.setString(2, user.getPassword());
+			stmt.setString(3, user.getEmail());
+			stmt.setString(4, user.getContact());
+			stmt.setString(5, user.getLocation());
+			stmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+			stmt.executeUpdate();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return(false);
+		}
+		finally {
+			try { if(stmt != null) stmt.close(); } catch (Exception e) {};
+		}
+		return(true);
+	}
+
+	public boolean checkLoginCredentials(String username, String password) {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			stmt = conn.prepareStatement("SELECT * FROM users WHERE username=? AND password=?");
+			stmt.setString(1, username);
+			stmt.setString(2, password);
+			rs = stmt.executeQuery();
 			while(rs.next()) {
-				sb.append("<section>" + rs.getString("section_type") + "</section>");
-				sb.append("<category_id>" + rs.getInt("category_id") + "</category_id>");
-				sb.append("<price>" + rs.getPrice("price") + "</price>");
-				sb.append("<item_condition>" + rs.getString("item_condition") + "</item_condition>");
-				sb.append("<description>" + rs.getString("description") + "</description>");
-				sb.append("<image>" + rs.getString("imagedata") + "</image>");
-				sb.append("<date_posted>" + rs.getString("date_posted") + "</date_posted>");
-				sb.append("<user_id>" + rs.getInt("user_id") + "</user_id>");
+				if(username.equalsIgnoreCase(rs.getString("username")) && 
+						password.equalsIgnoreCase(rs.getString("password"))) {
+					return(true);
+				}
+				else {
+					return(false);
+				}
 			}
 		}
 		catch(Exception e) {
 			e.printStackTrace();
+			return(false);
 		}
 		finally {
-			try { if(stmt != null) {stmt = null;}} catch(Exception e){};
-			try { if(rs != null) {rs = null;}} catch(Exception e){};
+			try { if(stmt != null) stmt.close(); } catch (Exception e) {};
+			try { if(rs != null) rs.close(); } catch (Exception e) {};
 		}
-		return(sb.toString());
+		return(true);
+	}
 }
